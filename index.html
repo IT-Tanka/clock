@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clock</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            padding: 30px 10px;
+        }
+
+        .clock {
+            width: 30vw;
+            height: 30vw;
+            min-width: 250px;
+            max-width: 640px;
+            min-height: 250px;
+            max-height: 640px;
+            position: relative;
+            border: 10px solid #333333a1;
+            border-radius: 50%;
+            background: white;
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            transform-origin: bottom;
+            background-color: #333;
+        }
+
+        .hour {
+            width: 6px;
+            height: 30%;
+            left: calc(50% - 3px);
+        }
+
+        .minute {
+            width: 4px;
+            height: 40%;
+            left: calc(50% - 2px);
+        }
+
+        .second {
+            width: 2px;
+            height: 45%;
+            left: calc(50% - 1px);
+            background-color: red;
+        }
+
+        /* Hour markers */
+        .mark {
+            position: absolute;
+            width: 4px;
+            height: 26px;
+            background-color: #33333348;
+            top: calc(50% - 13px);
+            left: calc(50% - 2px);
+            transform-origin: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="clock">
+        <div class="hand hour"></div>
+        <div class="hand minute"></div>
+        <div class="hand second"></div>
+    </div>
+
+    <script>
+
+        // Function to create hour markers dynamically
+        function createHourMarkers() {
+            const clock = document.querySelector('.clock');
+            const angles = Array.from({ length: 12 }, (_, i) => i * 30); // Angles: 0, 30, 60, ..., 330
+            angles.forEach(angle => {
+                const mark = document.createElement('div');
+                mark.classList.add('mark');
+                mark.style.transform = `rotate(${angle}deg)`; // Initially position the marks
+                clock.appendChild(mark);
+            });
+        }
+
+        // Function to define the position of the hour markers
+        function defineHourMarkersPosition() {
+            const clockRadius = document.querySelector('.clock').offsetWidth / 2;
+            const marks = document.querySelectorAll('.mark');
+
+            marks.forEach(mark => {
+                const rotation = mark.style.transform.match(/rotate\((\d+)deg\)/);
+                if (rotation) {
+                    const angle = parseInt(rotation[1], 10); // Extract the rotation angle
+                    mark.style.transform = `rotate(${angle}deg) translateY(-${clockRadius * 0.8}px)`; // 80% of the clock's radius
+                }
+            });
+        }
+
+        // Function to update the clock hands
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+
+            const hourHand = document.querySelector(".hour");
+            const minuteHand = document.querySelector(".minute");
+            const secondHand = document.querySelector(".second");
+
+            // Angles for the hands
+            const hoursAngle = (hours % 12) * 30 + minutes * 0.5; // Hour hand (30 degrees per hour + 0.5 degrees per minute)
+            const minutesAngle = minutes * 6; // Minute hand (6 degrees per minute)
+            const secondsAngle = seconds * 6; // Second hand (6 degrees per second)
+
+            // Set rotation for the hands
+            hourHand.style.transform = `rotate(${hoursAngle}deg)`;
+            minuteHand.style.transform = `rotate(${minutesAngle}deg)`;
+            secondHand.style.transform = `rotate(${secondsAngle}deg)`;
+        }
+
+        // Debounced resize function for better performance
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(defineHourMarkersPosition, 200); // Debounce resize
+        });
+
+        // Initialize the clock
+        createHourMarkers();
+        defineHourMarkersPosition();
+        setInterval(updateClock, 1000);
+        updateClock();
+
+    </script>
+</body>
+
+</html>
